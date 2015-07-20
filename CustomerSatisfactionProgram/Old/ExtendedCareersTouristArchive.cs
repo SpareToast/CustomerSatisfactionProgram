@@ -10,20 +10,9 @@ namespace ExtendedCareers
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     class ExtendedCareersTouristArchive : MonoBehaviour
     {
-		// Static singleton instance
+/*		// Static singleton instance
 		private static ExtendedCareersTouristArchive instance;
 
-        private List<ProtoCrewMember> ProtoTouristArchive;
-        private List<string> TouristArchive;
-        private List<string> ReservedTouristArchive;
-		private int odds = 1;
-		
-		private System.Random random = new System.Random();
-		
-		private ExtendedCareersTouristArchive()
-		{
-			
-		}
 		
 		// Static singleton property
 		public static ExtendedCareersTouristArchive Instance
@@ -37,6 +26,18 @@ namespace ExtendedCareers
 				return instance;
 			}
 		}
+*/
+        private static List<string> TouristArchive;
+        private static List<string> ReservedTouristArchive;
+        private static int odds = 1;
+
+        private static System.Random random = new System.Random();
+
+        private ExtendedCareersTouristArchive()
+        {
+
+        }
+
 
         void Awake()
         {
@@ -46,16 +47,21 @@ namespace ExtendedCareers
                 Debug.Log("ExtendedCareers TouristArchive - Awaked");
                 GameEvents.onKerbalAdded.Add(OnKerbalAdded);
                 GameEvents.onKerbalRemoved.Add(OnKerbalRemoved);
-                if (ProtoTouristArchive == null)
-                    ProtoTouristArchive = new List<ProtoCrewMember>();
-                if (TouristArchive == null)
-                    TouristArchive = new List<string>();
-                if (ReservedTouristArchive == null)
-                    ReservedTouristArchive = new List<string>();
+                if (CustomerArchive == null)
+                {
+                    Debug.Log("TA null");
+                    CustomerArchive = new List<string>();
+                }
+                if (ReservedCustomerArchive == null)
+                {
+                    Debug.Log("RTA null");
+                    ReservedCustomerArchive = new List<string>();
+                }
+                Debug.Log("************** Customer Archive " + StringListString(CustomerArchive) + " " + CustomerArchive.Count());
             }
             catch (Exception ex)
             {
-                Debug.Log("ExtendedCareers TouristArchive - Awake error: " + ex.Message + ex.StackTrace);
+                Debug.Log("ExtendedCareers CustomerArchive - Awake error: " + ex.Message + ex.StackTrace);
             }
             
         }
@@ -66,24 +72,25 @@ namespace ExtendedCareers
             if (pcm.type == ProtoCrewMember.KerbalType.Applicant)
             {
                 Debug.Log("*****************************Valid Applicant!************************************************");
-			    int count = TouristArchive.Count();
+			    int count = CustomerArchive.Count();
 			    int countRandom = random.Next(0, count*odds);
 
                 if (countRandom < count)
 		    	{
                     Debug.Log("*****************************Let's Do This!************************************************");
-                    string spaceJunkieName = TouristArchive[countRandom];
+                    string spaceJunkieName = CustomerArchive[countRandom];
                     ProtoCrewMember spaceJunkie = null;
                     foreach (ProtoCrewMember k in HighLogic.CurrentGame.CrewRoster.Unowned)
                     {
                         if (k.name == spaceJunkieName)
                         {
+
                             spaceJunkie = k;
                         }
                     }
                     if (spaceJunkie != null)
                     {
-                        ReserveTourist(countRandom, "Applicant");
+                        ReserveCustomer(countRandom, "Applicant");
                         Debug.Log("*****************************" + pcm.name + "************************************************");
                         pcm = spaceJunkie;
                         Debug.Log("*****************************" + pcm.name + "************************************************");
@@ -96,22 +103,23 @@ namespace ExtendedCareers
 		{
             Debug.Log("Removing " + pcm.name);
             string name = pcm.name;
-			if ((pcm.type == ProtoCrewMember.KerbalType.Tourist)&&(!TouristArchive.Contains(pcm.name))) {
+			if ((pcm.type == ProtoCrewMember.KerbalType.Tourist)&&(!CustomerArchive.Contains(pcm.name))) {
                 Debug.Log("Archiving - OKR " + name);
   				ArchiveKerbal(pcm);
                 Debug.Log("Archived - OKR " + name);
                 ListKerbal(pcm);
-	    	}   else if (ReservedTouristArchive.Count>0){
-                foreach (string k in ReservedTouristArchive)
+	    	}   else if (ReservedCustomerArchive.Count>0) {
+                foreach (string k in ReservedCustomerArchive)
 			    {
                    	if (k == pcm.name)
 				   	{
-                   		ReservedTouristArchive.Remove(k);
+                   		ReservedCustomerArchive.Remove(k);
                         ArchiveKerbal(pcm);
 				   	}
 				}
 			}
             Debug.Log("End of OnKerbalRemoved " + name);
+            Debug.Log("************** Tourist Archive " + StringListString(TouristArchive) + " " + TouristArchive.Count());
 		}
 
         void ArchiveKerbal(ProtoCrewMember pcm)
@@ -135,6 +143,7 @@ namespace ExtendedCareers
             //add them to the list
             TouristArchive.Add(amnesiac.name);
             Debug.Log("Listed " + amnesiac.name);
+            Debug.Log("************** Tourist Archive " + StringListString(TouristArchive) + " " + TouristArchive.Count());
         }
 
         public void ListKerbal(ProtoCrewMember pcm)
@@ -143,7 +152,7 @@ namespace ExtendedCareers
             Debug.Log(pcm.flightLog);
         }
 
-		public string ReserveTourist(int location, string purpose)
+		public string ReserveCustomer(int location, string purpose)
 		{
             if ((location >= 0) && (location < TouristArchive.Count()))
 			{
@@ -154,5 +163,15 @@ namespace ExtendedCareers
 			}
 			else return null;
 		}
+
+        public string StringListString(List<string> list)
+        {
+            string newstring = "";
+            foreach (string s in list)
+            {
+                newstring = newstring + s + " ";
+            }
+            return newstring;
+        }
 	}
 }

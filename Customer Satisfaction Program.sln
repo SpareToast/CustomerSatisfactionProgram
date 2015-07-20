@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedCareers", "ExtendedCareers\ExtendedCareers.csproj", "{F3E6543C-4BF4-4040-A5D4-58D063A7531F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerSatisfactionProgram", "CustomerSatisfactionProgram\CustomerSatisfactionProgram.csproj", "{F3E6543C-4BF4-4040-A5D4-58D063A7531F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -7,8 +7,8 @@
     <ProjectGuid>{F3E6543C-4BF4-4040-A5D4-58D063A7531F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ExtendedCareers</RootNamespace>
-    <AssemblyName>ExtendedCareers</AssemblyName>
+    <RootNamespace>CustomerSatisfactionProgram</RootNamespace>
+    <AssemblyName>CustomerSatisfactionProgram</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,9 +44,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExtendedCareersTouristArchive.cs" />
+    <Compile Include="CustomerManager.cs" />
+    <Compile Include="CustomerRecord.cs" />
+    <Compile Include="ScenarioLauncher.cs" />
+    <Compile Include="CustomerSave.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
