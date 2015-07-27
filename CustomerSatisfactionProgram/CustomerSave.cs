@@ -13,8 +13,7 @@ namespace CustomerLoyaltyProgram
         public ConfigNode ModNode { get; private set; }
 
         private static Dictionary<String, CustomerRecord> _customerArchive;
-        private static Dictionary<String, CustomerRecord> _reservedCustomerArchive;
-
+        private static Dictionary<String, CustomerRecord> _reservedCustomers;
 
         public static Dictionary<String, CustomerRecord> CustomerArchive()
         {
@@ -22,10 +21,10 @@ namespace CustomerLoyaltyProgram
             return _customerArchive;
         }
 
-        public static Dictionary<String, CustomerRecord> ReservedCustomerArchive()
+        public static Dictionary<String, CustomerRecord> ReservedCustomers()
         {
-            if (_reservedCustomerArchive == null) _reservedCustomerArchive = new Dictionary<string, CustomerRecord>();
-            return _reservedCustomerArchive;
+            if (_reservedCustomers == null) _reservedCustomers = new Dictionary<string, CustomerRecord>();
+            return _reservedCustomers;
         }
 
         public static CustomerSave Instance { get; private set; }
@@ -37,29 +36,42 @@ namespace CustomerLoyaltyProgram
 
         public override void OnLoad(ConfigNode gameNode)
         {
-            base.OnLoad(gameNode);
-            if (gameNode.HasNode("CUSTOMER_LOYALTY_PROGRAM"))
+            if (gameNode.HasNode("CUSTOMER_SATISFACTION_PROGRAM"))
             {
-                ModNode = gameNode.GetNode("CUSTOMER_LOYALTY_PROGRAM");
-                ConfigNode[] archivedNodes = ModNode.GetNodes("ARCHIVEDCUSTOMERS");
-                foreach (ConfigNode customerNode in archivedNodes)
-                {
-                    CustomerRecord c = ResourceUtilities.LoadNodeProperties<CustomerRecord>(customerNode);
-                    CustomerSave.CustomerArchive()[c.name] = c;
-                }
-                ConfigNode[] reservedNodes = ModNode.GetNodes("RESERVEDCUSTOMERS");
-                foreach (ConfigNode customerNode in archivedNodes)
-                {
-                    CustomerRecord c = ResourceUtilities.LoadNodeProperties<CustomerRecord>(customerNode);
-                    CustomerSave.ReservedCustomerArchive()[c.name] = c;
-                }
+                Debug.Log("CUSTOMER STORE FOUND (LOAD)");
+                ModNode = gameNode.GetNode("CUSTOMER_SATISFACTION_PROGRAM");
+                ConfigNode[] archivedNodes = ModNode.GetNodes("ARCHIVED_CUSTOMER");
 
+                foreach (ConfigNode customerNode in archivedNodes)
+                {
+                    CustomerRecord customerRecord = ResourceUtilities.LoadNodeProperties<CustomerRecord>(customerNode);
+
+                    ConfigNode kerbalNode = customerNode.GetNode("KERBAL");
+                    customerRecord.kerbal  = new ProtoCrewMember(Game.Modes.CAREER, kerbalNode);
+
+                    CustomerSave.CustomerArchive()[customerRecord.kerbal.name] = customerRecord;
+                }
+                /*
+                                ConfigNode[] reservedNodes = ModNode.GetNodes("RESERVED_CUSTOMERS");
+                                foreach (ConfigNode reservedNode in archivedNodes)
+                                {
+                                    string c = ResourceUtilities.LoadNodeProperties<string>(reservedNode);
+                                    CustomerSave.ReservedCustomers()[c.name] = c;
+                                }
+
+                                ConfigNode[] archivedNodes = ModNode.GetNodes("ARCHIVED_CUSTOMER");
+                                foreach (ConfigNode customerNode in archivedNodes)
+                                {
+                                    ProtoCrewMember p = new ProtoCrewMember(Game.Modes.CAREER, customerNode);
+                                    CustomerSave.CustomerArchive()[p.name] = new CustomerRecord(p);
+                                }
+                */
             }
             else
             {
-                        _customerArchive = new Dictionary<string, CustomerRecord>();
-                        _reservedCustomerArchive = new Dictionary<String, CustomerRecord>();
-
+                Debug.Log("CUSTOMER STORE NOT FOUND (LOAD)");
+                _customerArchive = new Dictionary<string, CustomerRecord>();
+                _reservedCustomers = new Dictionary<String, CustomerRecord>();
             }
         }
 
@@ -79,35 +91,20 @@ namespace CustomerLoyaltyProgram
                 ModNode = gameNode.AddNode("CUSTOMER_SATISFACTION_PROGRAM");
             }
 
-            foreach (KeyValuePair<string, CustomerRecord> c in _customerArchive)
+            foreach (KeyValuePair<string, CustomerRecord> p in CustomerArchive())
             {
-                ConfigNode customerNode = new ConfigNode("ARCHIVEDCUSTOMER");
-//                ProtoCrewMember amnesiac = HighLogic.CurrentGame.CrewRoster.GetNewKerbal();
-                customerNode.AddValue("name", c.Value.name);
-                customerNode.AddValue("origin", c.Value.origin);
 
-/*                customerNode.AddValue("gender", t.Value.gender);
-                customerNode.AddValue("courage", t.Value.courage);
-                customerNode.AddValue("stupidity", t.Value.stupidity);
-                customerNode.AddValue("isBadass", t.Value.isBadass);
-                customerNode.AddValue("type", t.Value.type);
-                customerNode.AddValue("rosterStatus", t.Value.rosterStatus);
+                ConfigNode customerNode = new ConfigNode("ARCHIVED_CUSTOMER");
 
-                ConfigNode careerNode = new ConfigNode("CAREER_LOG");
-                t.Value.careerLog.Save(careerNode);
-                customerNode.AddNode(careerNode);
-                ConfigNode flightNode = new ConfigNode("FLIGHT_LOG");
-                t.Value.flightLog.Save(flightNode);
-                customerNode.AddNode(flightNode);
-*/                ModNode.AddNode(customerNode);
-            }
-            foreach (KeyValuePair<string, CustomerRecord> c in _reservedCustomerArchive)
-            {
-                ConfigNode customerNode = new ConfigNode("RESERVEDCUSTOMER");
-                customerNode.AddValue("name", c.Value.name);
-                customerNode.AddValue("origin", c.Value.origin);
+                ConfigNode kerbalNode = new ConfigNode("KERBAL");
+                p.Value.kerbal.Save(kerbalNode);
+                customerNode.AddNode(kerbalNode);
+
+                customerNode.AddValue("origin", p.Value.origin);
+
                 ModNode.AddNode(customerNode);
             }
+
         }
     }
 }

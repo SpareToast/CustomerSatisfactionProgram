@@ -10,7 +10,6 @@ namespace CustomerLoyaltyProgram
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
     public class CustomerManager : MonoBehaviour
     {
-        private static string suffix = "CSP Archive TOU ";
         private static System.Random random = new System.Random();
         private static int odds = 1;
 
@@ -41,21 +40,20 @@ namespace CustomerLoyaltyProgram
         public void OnKerbalRemoved(ProtoCrewMember pcm)
         {
             Debug.Log("Removing " + pcm.name);
-/*            if ((pcm.type == ProtoCrewMember.KerbalType.Tourist))
+            if ((pcm.type == ProtoCrewMember.KerbalType.Tourist))
             {
                 Debug.Log("Archiving - OKR " + pcm.name);
                 ArchiveKerbal(pcm);
                 Debug.Log("Archived - OKR " + pcm.name);
                 ListKerbal(pcm);
             }
-*/
+
             Debug.Log("End of OnKerbalRemoved " + pcm.name);
- //           Debug.Log("************** Customer Archive " + StringListString(CustomerArchive) + " " + CustomerArchive.Count());
         }
 
         void OnKerbalAdded(ProtoCrewMember pcm)
         {
-            Debug.Log("Added!" + pcm.name.ToString() + " " + pcm.type.ToString());
+/*            Debug.Log("Added!" + pcm.name.ToString() + " " + pcm.type.ToString());
             if (pcm.type == ProtoCrewMember.KerbalType.Applicant)
             {
                 Debug.Log("*****************************Valid Applicant!************************************************");
@@ -85,45 +83,55 @@ namespace CustomerLoyaltyProgram
                     }
                 }
             }
+*/
         }
 
         void ArchiveKerbal(ProtoCrewMember pcm)
         {
             Debug.Log("Archiving - AK " + pcm.name);
-            //spawn a crewmember to crib mystery stats off
-            ProtoCrewMember amnesiac = HighLogic.CurrentGame.CrewRoster.GetNewKerbal();
-            Debug.Log("Cloned " + amnesiac.name);
-
-            //teach Kerbal how to be themselves again
-            amnesiac.name = suffix + pcm.name;
-            amnesiac.gender = pcm.gender;
-            amnesiac.courage = pcm.courage;
-            amnesiac.stupidity = pcm.stupidity;
-            amnesiac.isBadass = pcm.isBadass;
-            amnesiac.flightLog = pcm.flightLog;
-            Debug.Log("Re-Educated " + amnesiac.name);
-
-            //set them to be hidden nobodies
-            amnesiac.type = ProtoCrewMember.KerbalType.Unowned;
-            amnesiac.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
-            Debug.Log("Hid " + amnesiac.name);
-
-            CustomerRecord customerRecord = new CustomerRecord(amnesiac);
-            CustomerSave.CustomerArchive()[customerRecord.name] = customerRecord;
-            Debug.Log("Listed " + amnesiac.name);
-            
-            //            Debug.Log("************** Customer Archive " + StringListString(CustomerArchive) + " " + CustomerArchive.Count());
+            CustomerSave.CustomerArchive()[pcm.name] = new CustomerRecord(pcm);
         }
 
         public CustomerRecord ReserveCustomer(CustomerRecord customer, string purpose)
         {
-//            if ((location >= 0) && (location < CustomerSave.CustomerArchive().Count()))
-//            {
-                CustomerSave.ReservedCustomerArchive()[customer.name] = customer;
-                CustomerSave.CustomerArchive().Remove(customer.name);
-                return customer;
-//            }
-//            else return null;
+            CustomerSave.ReservedCustomers()[customer.Name()] = customer;
+            CustomerSave.CustomerArchive().Remove(customer.Name());
+            return customer;
+        }
+
+        public void reeducateKerbal(ProtoCrewMember to, ProtoCrewMember from)
+        {
+            to.name = from.name;
+            to.courage = from.courage;
+            to.stupidity = from.stupidity;
+            to.isBadass = from.isBadass;
+            to.gender = from.gender;
+            to.experienceTrait = from.experienceTrait;
+            to.hasToured = from.hasToured;
+        }
+
+        public void transferCareerLog(ProtoCrewMember to, ProtoCrewMember from)
+        {
+            // record current flightlog & reset, if applicable
+            FlightLog current = null;
+            if (to.flightLog.Entries.Count() > 0) {
+                current = new FlightLog();
+                foreach (FlightLog.Entry entry in to.flightLog.Entries)
+                    current.Entries.Add(entry);
+                to.flightLog = new FlightLog();
+            }
+            
+            //transfer careerLog
+            foreach (FlightLog flight in from.careerLog.GetFlights()) {
+                foreach (FlightLog.Entry entry in flight.Entries)
+                    to.flightLog.Entries.Add(entry);
+                to.ArchiveFlightLog();
+            }
+
+            //rewrite flightLog, if applicable
+            if (current != null)
+                foreach (FlightLog.Entry entry in current.Entries)
+                    to.flightLog.Entries.Add(entry);
         }
 
         public void ListKerbal(ProtoCrewMember pcm)

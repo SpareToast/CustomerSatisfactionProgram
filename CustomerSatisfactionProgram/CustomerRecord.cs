@@ -8,72 +8,25 @@ namespace CustomerLoyaltyProgram
 {
     public class CustomerRecord
     {
-        
-        public string name { get; set;}
-        public string origin { get; set; }
-/*      currently piggybacking on the kerbal save function
 
-        public string gender { get; set; }
-        public float courage { get; set; }
-        public float stupidity { get; set; }
-        public bool isBadass { get; set; }
-        public FlightLog flightLog { get; set; }
-        public FlightLog careerLog { get; set; }
-        public string type { get; set; }
-        public string rosterStatus { get; set; }
-*/
+        public ProtoCrewMember kerbal { get; set;}
+        public string origin { get; set; }
+
         public CustomerRecord()
         {
         }
 
         public CustomerRecord(ProtoCrewMember pcm)
         {
-            name = pcm.name;
-            origin = "TOU";
+            kerbal = pcm;
+            origin = "TOURIST";
+        }
 
-/*      currently piggybacking on the kerbal save function
-
-            if (pcm.gender == ProtoCrewMember.Gender.Male)
-                gender = "Male";
-            else gender = "Female";
-            courage = pcm.courage;
-            stupidity = pcm.stupidity;
-            isBadass = pcm.isBadass;
-            flightLog = pcm.flightLog;
-            careerLog = pcm.careerLog;
-            switch (pcm.type)
-            {
-                case ProtoCrewMember.KerbalType.Applicant:
-                    type = "Applicant";
-                    break;
-                case ProtoCrewMember.KerbalType.Crew:
-                    type = "Crew";
-                    break;
-                case ProtoCrewMember.KerbalType.Tourist:
-                    type = "Tourist";
-                    break;
-                default:
-                    type = "Unowned";
-                    break;
-            }
-
-            switch (pcm.rosterStatus)
-            {
-                case ProtoCrewMember.RosterStatus.Assigned:
-                    rosterStatus = "Assigned";
-                    break;
-                case ProtoCrewMember.RosterStatus.Available:
-                    rosterStatus = "Available";
-                    break;
-                case ProtoCrewMember.RosterStatus.Dead:
-                    rosterStatus = "Dead";
-                    break;
-                default:
-                    rosterStatus = "Missing";
-                    break;
-            }
-*/  }
-
+        public string Name()
+        {
+            return kerbal.name;
+        }
+        
 /*        public ProtoCrewMember ToProtoCrewMember()
         {
             ProtoCrewMember amnesiac = CrewGenerator.RandomCrewMemberPrototype();
