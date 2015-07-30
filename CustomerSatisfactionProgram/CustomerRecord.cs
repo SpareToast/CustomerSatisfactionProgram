@@ -8,7 +8,6 @@ namespace CustomerLoyaltyProgram
 {
     public class CustomerRecord
     {
-
         public ProtoCrewMember kerbal { get; set;}
         public string origin { get; set; }
 
