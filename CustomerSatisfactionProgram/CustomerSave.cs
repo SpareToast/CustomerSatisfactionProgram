@@ -7,7 +7,7 @@ using UnityEngine;
 
 //TODO: Too many static variables
 
-namespace CustomerLoyaltyProgram
+namespace CustomerSatisfactionProgram
 {
     public class CustomerSave : ScenarioModule
     {
@@ -91,6 +91,7 @@ namespace CustomerLoyaltyProgram
                 customerNode.AddNode(kerbalNode);
 
                 customerNode.AddValue("origin", p.Value.origin);
+                customerNode.AddValue("status", p.Value.status);
 
                 ModNode.AddNode(customerNode);
             }
@@ -106,6 +107,7 @@ namespace CustomerLoyaltyProgram
                 customerNode.AddNode(kerbalNode);
 
                 customerNode.AddValue("origin", p.Value.origin);
+                customerNode.AddValue("status", p.Value.status);
 
                 ModNode.AddNode(customerNode);
             }

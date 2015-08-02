@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace CustomerLoyaltyProgram
+namespace CustomerSatisfactionProgram
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     public class ScenarioLauncher : MonoBehaviour

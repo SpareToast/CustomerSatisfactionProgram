@@ -7,15 +7,18 @@ using UnityEngine;
 
 //TODO: Too many static variables
 
-namespace CustomerLoyaltyProgram
+namespace CustomerSatisfactionProgram
 {
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
     public class CustomerManager : MonoBehaviour
     {
+        private static ConfigNode settings;
         private static System.Random random = new System.Random();
         private static int cap = 16;
+        private static int cleanup = 0;
+        private static string version = "0.9.0";
 
-        //This doesn't do anything yet but it will		
+/*        //This doesn't do anything yet but it will		
         private CustomerManager() { }
         private static Dictionary<string, CustomerRecord> _archivedCustomers;
         private static Dictionary<string, CustomerRecord> _reservedCustomers;
@@ -29,9 +32,29 @@ namespace CustomerLoyaltyProgram
                 return instance;
             }
         }
-
+*/
         public void Awake() {
-            Debug.Log("Customer Manager is awake");
+            Debug.Log("********************************************************************" + HighLogic.LoadedScene + "*********************************************************************");
+            settings = ConfigNode.Load("GameData/CustomerSatisfactionProgram/Config.cfg");
+
+            if (settings.HasNode("SETTINGS")) {
+                Debug.Log("Loading Settings");
+                settings = settings.GetNode("SETTINGS");
+
+                if (settings.HasValue("VERSION")) {
+                    version = (settings.GetValue("VERSION"));
+                }
+                if (settings.HasValue("CAP")) {
+                    cap = (int.Parse(settings.GetValue("CAP")));
+                }
+                if (settings.HasValue("CLEANUP")) {
+                    cleanup = (int.Parse(settings.GetValue("CLEANUP")));
+                    if (cleanup == 2) {
+                        settings.AddValue("CLEANUP", 0);
+                    }
+                }
+            }
+
             GameEvents.onKerbalRemoved.Add(OnKerbalRemoved);
 			GameEvents.onKerbalAdded.Add(OnKerbalAdded);
             GameEvents.onKerbalTypeChange.Add(OnKerbalTypeChange);
@@ -39,8 +62,14 @@ namespace CustomerLoyaltyProgram
         }
 		
 		public void Start() {
-			_archivedCustomers = CustomerSave.ArchivedCustomers();
-			_reservedCustomers = CustomerSave.ReservedCustomers();
+            //			_archivedCustomers = CustomerSave.ArchivedCustomers();
+            //			_reservedCustomers = CustomerSave.ReservedCustomers();
+
+            if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+            {
+                CustomerGUI customerGUI = new CustomerGUI();
+                RenderingManager.AddToPostDrawQueue(0, customerGUI.OnDraw);
+            }
 		}
 
         public void OnGameSceneLoadRequested(GameScenes scene) {
@@ -55,51 +84,50 @@ namespace CustomerLoyaltyProgram
         }
 
         public void OnKerbalRemoved(ProtoCrewMember pcm) {
-//            Debug.Log("Removing " + pcm.name);
 			bool located = false;
 			if (CustomerSave.ReservedCustomers().ContainsKey(pcm.name)) {
+                Debug.Log(pcm.name + " has gone home");
 		        CustomerSave.ReservedCustomers().Remove(pcm.name);
 			    if (pcm.rosterStatus != ProtoCrewMember.RosterStatus.Dead)
                     ArchiveKerbal(pcm);
 	    		located = true;
             }
             if ((!located) && (pcm.type == ProtoCrewMember.KerbalType.Tourist)) {
-//                Debug.Log("Archiving - OKR " + pcm.name);
                 ArchiveKerbal(pcm);
-//                Debug.Log("Archived - OKR " + pcm.name);
                 ListKerbal(pcm);
 				located = true;
             }
-
-//            Debug.Log("End of OnKerbalRemoved " + pcm.name);
         }
 
+//      when a new kerbal is added, potentially replaces with an archived customer
         public void OnKerbalAdded(ProtoCrewMember pcm) {
-//            Debug.Log("Added!" + pcm.name.ToString() + " " + pcm.type.ToString() + " " + pcm.experienceTrait.ToString());
 			bool located = false;
             if (CustomerSave.ArchivedCustomers().ContainsKey(pcm.name)) {
+                    Debug.Log(pcm.name + " has returned on their own!");
 					ReplaceKerbal(pcm, CustomerSave.ArchivedCustomers()[pcm.name].kerbal);
 					located = true;
 			}
+
             if ((!located) && ((pcm.type == ProtoCrewMember.KerbalType.Unowned) || (pcm.type == ProtoCrewMember.KerbalType.Applicant))) {
-
-//				Debug.Log("*****************************Valid Applicant!************************************************");
-
 				int countRandom = random.Next(0, cap);
                 int count = CustomerSave.ArchivedCustomers().Count();
                 string spaceJunkie = null;
-//               Debug.Log(count);
+                Debug.Log("Is " + count + " > " + countRandom + "?");
+
                 foreach (KeyValuePair<string, CustomerRecord> c in CustomerSave.ArchivedCustomers()) {
-                    Debug.Log(count);
                     if (countRandom == 0) {
-//                        Debug.Log("*****************************Let's Do This!************************************************");
                         spaceJunkie = c.Key;
                         located = true;
                     }
                     countRandom = countRandom - 1;
                 }
-                if (spaceJunkie != null)
+                if (spaceJunkie != null) {
+                    if (pcm.type == ProtoCrewMember.KerbalType.Unowned)
+                        CustomerSave.ArchivedCustomers()[spaceJunkie].status = "CONTRACT";
+                    if (pcm.type == ProtoCrewMember.KerbalType.Applicant)
+                        CustomerSave.ArchivedCustomers()[spaceJunkie].status = "APPLICANT";
                     ReplaceKerbal(pcm, CustomerSave.ArchivedCustomers()[spaceJunkie].kerbal);
+                }
             }
         }
 
@@ -107,13 +135,24 @@ namespace CustomerLoyaltyProgram
 			bool located = false;
             if ((oldType == ProtoCrewMember.KerbalType.Applicant) && (newType == ProtoCrewMember.KerbalType.Crew)) {
                 if (CustomerSave.ReservedCustomers().ContainsKey(pcm.name)) {
+                        Debug.Log(pcm.name + " has been hired");
                         CustomerSave.ReservedCustomers().Remove(pcm.name);
                         located = true;
                 }
             }
-         
+
             if ((oldType == ProtoCrewMember.KerbalType.Unowned) && (newType == ProtoCrewMember.KerbalType.Tourist)) {
+                if (CustomerSave.ReservedCustomers().ContainsKey(pcm.name))
+                {
+                    Debug.Log(pcm.name + " is going to space");
+                    CustomerSave.ReservedCustomers().Remove(pcm.name);
+                    located = true;
+                }
+            }
+
+            if ((oldType == ProtoCrewMember.KerbalType.Unowned) && (newType == ProtoCrewMember.KerbalType.Crew)) {
                 if (CustomerSave.ReservedCustomers().ContainsKey(pcm.name)) {
+                        Debug.Log(pcm.name + " has been rescued");
                         CustomerSave.ReservedCustomers().Remove(pcm.name);
                         located = true;
                 }
@@ -132,36 +171,38 @@ namespace CustomerLoyaltyProgram
             {
                 Debug.Log(p);
             }
-            Debug.Log(contract.Keywords);
-            Debug.Log(contract.AllParameters);
-            Debug.Log(contract.GetType());
-            Debug.Log(contract.Notes);
-            Debug.Log(contract.Title);
-
         }
 */
         public void ArchiveKerbal(ProtoCrewMember pcm) {
             Debug.Log("Archiving " + pcm.name);
-            CustomerSave.ArchivedCustomers()[pcm.name] = new CustomerRecord(pcm);
+            pcm.type = ProtoCrewMember.KerbalType.Crew;
+            KerbalRoster.SetExperienceTrait(pcm);
+            CustomerRecord customer = new CustomerRecord(pcm);
+            customer.status = "ARCHIVED";
+            CustomerSave.ArchivedCustomers()[pcm.name] = customer;
+
         }
 
-        public void ReserveCustomer(ProtoCrewMember customer) {
-            CustomerSave.ReservedCustomers()[customer.name] = CustomerSave.ArchivedCustomers()[customer.name];
-            CustomerSave.ArchivedCustomers().Remove(customer.name);
+        public void ReserveCustomer(ProtoCrewMember pcm) {
+            Debug.Log("Reserving " + pcm.name);
+            CustomerSave.ReservedCustomers()[pcm.name] = CustomerSave.ArchivedCustomers()[pcm.name];
+            CustomerSave.ArchivedCustomers().Remove(pcm.name);
         }
 		
 		public void ReplaceKerbal(ProtoCrewMember to, ProtoCrewMember from) {
             Debug.Log(from.name + " is bumping " + to.name);
             ReserveCustomer(from);
-			ReeducateKerbal(to, from);
+			UpdateTicket(to, from);
         }
 
-        public void ReeducateKerbal(ProtoCrewMember to, ProtoCrewMember from) {
+        public void UpdateTicket(ProtoCrewMember to, ProtoCrewMember from) {
+            Debug.Log(to.name + " is giving " + from.name + " their ticket");
             to.name = from.name;
             to.courage = from.courage;
             to.stupidity = from.stupidity;
             to.isBadass = from.isBadass;
             to.gender = from.gender;
+            to.experienceTrait = from.experienceTrait;
             to.hasToured = from.hasToured;
             TransferCareerLog(to, from);
         }
@@ -193,24 +234,9 @@ namespace CustomerLoyaltyProgram
         // also doesn't do  anything yet
         public void KerbalCleanup()
         {
-            List<string> list = new List<string>();
-            foreach (KeyValuePair<string, CustomerRecord> rc in CustomerSave.ReservedCustomers())
+            foreach (KeyValuePair<string, CustomerRecord> cr in CustomerSave.ReservedCustomers())
             {
-                bool found = false;
-                foreach (ProtoCrewMember pcm in HighLogic.CurrentGame.CrewRoster.Unowned)
-                {
-                    if (pcm.name == rc.Key)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    list.Add(rc.Key);
-            }
-            foreach (string s in list)
-            {
-
+                if (HighLogic.CurrentGame.CrewRoster.Exists(cr.Value.Name())) ;
             }
         }
 
