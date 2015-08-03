@@ -65,11 +65,6 @@ namespace CustomerSatisfactionProgram
             //			_archivedCustomers = CustomerSave.ArchivedCustomers();
             //			_reservedCustomers = CustomerSave.ReservedCustomers();
 
-            if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-            {
-                CustomerGUI customerGUI = new CustomerGUI();
-                RenderingManager.AddToPostDrawQueue(0, customerGUI.OnDraw);
-            }
 		}
 
         public void OnGameSceneLoadRequested(GameScenes scene) {
@@ -122,8 +117,10 @@ namespace CustomerSatisfactionProgram
                     countRandom = countRandom - 1;
                 }
                 if (spaceJunkie != null) {
-                    if (pcm.type == ProtoCrewMember.KerbalType.Unowned)
-                        CustomerSave.ArchivedCustomers()[spaceJunkie].status = "CONTRACT";
+                    if ((pcm.type == ProtoCrewMember.KerbalType.Unowned) && (pcm.experienceTrait.TypeName != "Tourist"))
+                        CustomerSave.ArchivedCustomers()[spaceJunkie].status = "CASTAWAY";
+                    if ((pcm.type == ProtoCrewMember.KerbalType.Unowned) && (pcm.experienceTrait.TypeName == "Tourist"))
+                        CustomerSave.ArchivedCustomers()[spaceJunkie].status = "TOURIST";
                     if (pcm.type == ProtoCrewMember.KerbalType.Applicant)
                         CustomerSave.ArchivedCustomers()[spaceJunkie].status = "APPLICANT";
                     ReplaceKerbal(pcm, CustomerSave.ArchivedCustomers()[spaceJunkie].kerbal);
