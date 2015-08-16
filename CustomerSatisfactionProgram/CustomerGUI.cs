@@ -23,6 +23,7 @@ namespace CustomerSatisfactionProgram
 
         void Awake()
         {
+            Debug.Log("CSP Gui Awake");
             var texture = new Texture2D(36, 36, TextureFormat.RGBA32, false);
             texture.LoadImage(File.ReadAllBytes("GAMEDATA/CUSTOMERSATISFACTIONPROGRAM/CSP.png"));
             Debug.Log(texture.ToString());

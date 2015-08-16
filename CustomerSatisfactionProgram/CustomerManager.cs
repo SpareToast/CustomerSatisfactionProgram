@@ -31,10 +31,10 @@ namespace CustomerSatisfactionProgram
                 }
                 return instance;
             }
-        }
-*/
+        } */
+
         public void Awake() {
-            Debug.Log("********************************************************************" + HighLogic.LoadedScene + "*********************************************************************");
+//            Debug.Log("********************************************************************" + HighLogic.LoadedScene + "*********************************************************************");
             settings = ConfigNode.Load("GameData/CustomerSatisfactionProgram/Config.cfg");
 
             if (settings.HasNode("SETTINGS")) {
@@ -107,7 +107,7 @@ namespace CustomerSatisfactionProgram
 				int countRandom = random.Next(0, cap);
                 int count = CustomerSave.ArchivedCustomers().Count();
                 string spaceJunkie = null;
-                Debug.Log("Is " + count + " > " + countRandom + "?");
+//                Debug.Log("Is " + count + " > " + countRandom + "?");
 
                 foreach (KeyValuePair<string, CustomerRecord> c in CustomerSave.ArchivedCustomers()) {
                     if (countRandom == 0) {
@@ -156,8 +156,8 @@ namespace CustomerSatisfactionProgram
             }
         }
 
-        /*
-        public void OnContractOffered(Contracts.Contract contract)
+
+/*      public void OnContractOffered(Contracts.Contract contract)
         {
             System.Type type = contract.GetType();
             if (contract is FinePrint.Contracts.TourismContract);
@@ -168,8 +168,8 @@ namespace CustomerSatisfactionProgram
             {
                 Debug.Log(p);
             }
-        }
-*/
+        } */
+
         public void ArchiveKerbal(ProtoCrewMember pcm) {
             Debug.Log("Archiving " + pcm.name);
             pcm.type = ProtoCrewMember.KerbalType.Crew;
@@ -193,7 +193,7 @@ namespace CustomerSatisfactionProgram
         }
 
         public void UpdateTicket(ProtoCrewMember to, ProtoCrewMember from) {
-            Debug.Log(to.name + " is giving " + from.name + " their ticket");
+            Debug.Log(to.name + " is being bumped by " + from.name);
             to.name = from.name;
             to.courage = from.courage;
             to.stupidity = from.stupidity;

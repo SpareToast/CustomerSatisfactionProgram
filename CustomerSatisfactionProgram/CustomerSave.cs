@@ -35,10 +35,11 @@ namespace CustomerSatisfactionProgram
 
         public override void OnLoad(ConfigNode gameNode) {
             if (gameNode.HasNode("CUSTOMER_SATISFACTION_PROGRAM")) {
-                Debug.Log("CUSTOMER STORE FOUND (LOAD)");
+                Debug.Log("CSP: SAVE FOUND");
                 ModNode = gameNode.GetNode("CUSTOMER_SATISFACTION_PROGRAM");
 
                 // restore archived customers
+                _archivedCustomers = new Dictionary<String, CustomerRecord>();
                 ConfigNode[] archivedNodes = ModNode.GetNodes("ARCHIVED_CUSTOMER");
                 foreach (ConfigNode customerNode in archivedNodes) {
                     CustomerRecord customerRecord = ResourceUtilities.LoadNodeProperties<CustomerRecord>(customerNode);
@@ -50,6 +51,7 @@ namespace CustomerSatisfactionProgram
                 }
 
                 // restore reserved customers
+                _reservedCustomers = new Dictionary<String, CustomerRecord>();
                 ConfigNode[] reservedNodes = ModNode.GetNodes("RESERVED_CUSTOMER");
                 foreach (ConfigNode customerNode in reservedNodes) {
                     CustomerRecord customerRecord = ResourceUtilities.LoadNodeProperties<CustomerRecord>(customerNode);
@@ -62,7 +64,7 @@ namespace CustomerSatisfactionProgram
             }
 
             else {
-                Debug.Log("CUSTOMER STORE NOT FOUND (LOAD)");
+                Debug.Log("CSP: SAVE NOT FOUND");
                 _archivedCustomers = new Dictionary<string, CustomerRecord>();
                 _reservedCustomers = new Dictionary<string, CustomerRecord>();
             }
@@ -73,7 +75,6 @@ namespace CustomerSatisfactionProgram
             base.OnSave(gameNode);
             Debug.Log("Saving??? " + CustomerSave.ArchivedCustomers());
             if (gameNode.HasNode("CUSTOMER_SATISFACTION_PROGRAM")) {
-                Debug.Log("CUSTOMER STORE FOUND (SAVE)");
                 ModNode = gameNode.GetNode("CUSTOMER_SATISFACTION_PROGRAM");
             }
             else {

@@ -16,7 +16,7 @@ namespace CustomerSatisfactionProgram
 
         void Awake()
         {
-            Debug.Log("Scenario Launcher is Awake");
+//            Debug.Log("Scenario Launcher is Awake");
         }
 
         void Start()
