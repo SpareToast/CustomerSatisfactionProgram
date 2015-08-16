@@ -16,22 +16,7 @@ namespace CustomerSatisfactionProgram
         private static System.Random random = new System.Random();
         private static int cap = 16;
         private static int cleanup = 0;
-        private static string version = "0.9.0";
-
-/*        //This doesn't do anything yet but it will		
-        private CustomerManager() { }
-        private static Dictionary<string, CustomerRecord> _archivedCustomers;
-        private static Dictionary<string, CustomerRecord> _reservedCustomers;
-        private static CustomerManager instance;
-        public static CustomerManager Instance {
-            get {
-                if (instance == null) {
-                    Debug.Log("Customer Manager instance is being instantiated.");
-                    instance = new CustomerManager();
-                }
-                return instance;
-            }
-        } */
+        private static string version = "0.9.2";
 
         public void Awake() {
 //            Debug.Log("********************************************************************" + HighLogic.LoadedScene + "*********************************************************************");

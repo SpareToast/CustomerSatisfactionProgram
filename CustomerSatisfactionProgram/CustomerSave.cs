@@ -27,12 +27,6 @@ namespace CustomerSatisfactionProgram
             return _reservedCustomers;
         }
 
-        public static CustomerSave Instance { get; private set; }
-
-        public CustomerSave() {
-            Instance = this;
-        }
-
         public override void OnLoad(ConfigNode gameNode) {
             if (gameNode.HasNode("CUSTOMER_SATISFACTION_PROGRAM")) {
                 Debug.Log("CSP: SAVE FOUND");
